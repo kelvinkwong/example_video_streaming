@@ -1,1 +1,241 @@
-../../dash/index.html
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Monitoring stream example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.1/dash.all.min.js" integrity="sha512-MIcFpSPLWmLSof4rgA6hcJ2LHRgT+2mF0sAv66F+R14JTddek4tNk++01LPCuV0BHjaB7DYHyIN97/A39N4MDA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Bootstrap core CSS -->
+    <style>
+        video {
+            width: 100%;
+        }
+
+        .dash-video-player {
+            position: relative; /* This position relative is needed to position the menus */
+            margin: 0 auto;
+            line-height: 1.0;
+        }
+
+        body {
+            background: darkslategrey;
+            color: white;
+        }
+
+        .col-md-6 {
+            flex: 0 0 auto;
+            width: 50%;
+        }
+
+        .row {
+            --bs-gutter-x: 1.5rem;
+            --bs-gutter-y: 0;
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: calc(var(--bs-gutter-y) * -1);
+            margin-right: calc(var(--bs-gutter-x)/ -2);
+            margin-left: calc(var(--bs-gutter-x)/ -2)
+        }
+    </style>
+
+    <script class="code">
+        const params = new URLSearchParams(window.location.search);    
+        var video,
+            player,
+            url;
+        function init() {
+            url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
+            url = params.get('manifest') || url;
+
+            var filterCapabilities = function(representation){
+                acodec = params.get('acodec'); // avc1, hev1, hvc1, vp09
+                vcodec = params.get('vcodec'); // ac-3, ec-3, mp4a.40.2, mp4a.40.5, mp4a.40.29
+
+                if (representation.mimeType.includes('audio') && acodec === null)
+                    return true;
+                if (representation.mimeType.includes('video') && vcodec === null)
+                    return true;
+
+                switch(acodec) {
+                    case "aac-lc":
+                        acodec = "mp4a.40.2"; break;
+                    case "aac-he":
+                        acodec = "mp4a.40.5"; break;
+                    case "aac-he-v2":
+                        acodec = "mp4a.40.29"; break;
+                }
+
+                switch(vcodec) {
+                    case "h264":
+                    case "avc":
+                        vcodec = "avc1"; break;
+                    case "h265":
+                    case "hevc":
+                    case "hvc":
+                        vcodec = "hvc1"; break;
+                    case "hev":
+                        vcodec = "hev1"; break;
+                    case "vp9":
+                        vcodec = "vp09"; break;
+                }
+
+                if (representation.codecs === acodec || representation.codecs === vcodec){
+                    console.log('enabled representation: ', representation);
+                    return true;
+                }
+                else if (representation.codecs.includes(vcodec)){
+                    console.log('enabled representation: ', representation);
+                    return true;
+                }
+                console.log('disabled representation: ', representation);
+                return false;
+            }
+
+
+            video = document.querySelector("video");
+            player = dashjs.MediaPlayer().create();
+            player.registerCustomCapabilitiesFilter(filterCapabilities);
+            player.initialize(video, url, true);
+            player.on(dashjs.MediaPlayer.events["PLAYBACK_ENDED"], function () {
+                clearInterval(eventPoller);
+                clearInterval(bitrateCalculator);
+            });
+            player.on(dashjs.MediaPlayer.events["PLAYBACK_TIME_UPDATED"], function () {
+                updatePlayerCurrentTime();
+            });
+
+            var eventPoller = setInterval(function () {
+                var streamInfo = player.getActiveStream().getStreamInfo();
+                var dashMetrics = player.getDashMetrics();
+                var dashAdapter = player.getDashAdapter();
+
+                if (dashMetrics && streamInfo) {
+                    const periodIdx = streamInfo.index;
+                    var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
+                    if (repSwitch){
+                        let bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
+                        let bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+                        let adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo);
+                        let currentRep = adaptation.Representation_asArray.find(function (rep) {
+                            return rep.id === repSwitch.to
+                        });
+                        var frameRate = currentRep.frameRate;
+                        var resolution = currentRep.width + 'x' + currentRep.height;
+                        document.getElementById('videoCodec').innerText = currentRep.codecs;
+                        document.getElementById('videoBufferLevel').innerText = bufferLevel + " secs";
+                        document.getElementById('videoFramerate').innerText = frameRate + " fps";
+                        document.getElementById('videoBitrate').innerText = bitrate + " Kbps";
+                        document.getElementById('videoResolution').innerText = resolution;
+                    }
+                    repSwitch = dashMetrics.getCurrentRepresentationSwitch('audio', true);
+                    if (repSwitch){
+                        let bufferLevel = dashMetrics.getCurrentBufferLevel('audio', true);
+                        let bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+                        let adaptation = dashAdapter.getAdaptationForType(periodIdx, 'audio', streamInfo);
+                        let currentRep = adaptation.Representation_asArray.find(function (rep) {
+                            return rep.id === repSwitch.to
+                        });
+                        document.getElementById('audioCodec').innerText = currentRep.codecs;
+                        document.getElementById('audioBufferLevel').innerText = bufferLevel + " secs";
+                        document.getElementById('audioSampleRate').innerText = currentRep.audioSamplingRate + " Hz";
+                        document.getElementById('audioBitrate').innerText = bitrate + " Kbps";
+                    }
+                }
+            }, 1000);
+        }
+
+        function updatePlayerCurrentTime() {
+            document.getElementById('timeCurrent').innerText = secondsToHHMMSS(video.currentTime);
+            document.getElementById('timeDuration').innerText = secondsToHHMMSS(video.duration);
+        };
+
+        function secondsToHHMMSS(seconds){
+            hours = Math.floor(seconds / 3600);
+            minutes = Math.floor(seconds / 60) % 60;
+            seconds = seconds % 60;
+
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+            return `${padStart(hours)}:${padStart(minutes)}:${padStart(seconds, 2)}s`;
+        };
+
+        function padStart(number, decimalPlace){
+            decimalPlace = decimalPlace || 0;
+            startPad = decimalPlace ? 5 : 2;
+            return number.toFixed(decimalPlace).toString().padStart(startPad,'0');
+        }
+
+    </script>
+</head>
+<body>
+<main>
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="h-100 p-5 bg-light border rounded-3">
+                    <h3>Monitoring stream example</h3>
+                    <p>Source: <a href="https://reference.dashif.org/dash.js/latest/samples/advanced/monitoring.html">Example</a> | <a href="https://github.com/Dash-Industry-Forum/dash.js/blob/development/samples/advanced/monitoring.html">Source</a></p>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <div class="dash-video-player code">
+                    <div class="videoContainer" id="videoContainer">
+                        <video preload="auto" controls="true" loop="true"></video>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div>
+                        <strong>Timestamp:</strong>
+                        <span id="timeCurrent">0</span>
+                        <span> / </span>
+                        <span id="timeDuration">0</span>
+                        <br/>
+                </div>
+                <div class="p-5 border rounded-3">
+                    <h4>Video Metrics</h4>
+                    <div>
+                        <strong>Codec:</strong>
+                        <span id="videoCodec"></span>    
+                        </br>
+                        <strong>Bitrate:</strong>
+                        <span id="videoBitrate"></span>
+                        <br/>
+                        <strong>Buffer level:</strong>
+                        <span id="videoBufferLevel"></span>
+                        </br>
+                        <strong>Framerate:</strong>
+                        <span id="videoFramerate"></span>    
+                        </br>
+                        <strong>Resolution:</strong>
+                        <span id="videoResolution"></span>
+                    </div>
+                </div>
+                <div class="p-5 border rounded-3">
+                    <h4>Audio Metrics</h4>
+                    <div>
+                        <strong>Codec:</strong>
+                        <span id="audioCodec"></span>    
+                        </br>
+                        <strong>Bitrate:</strong>
+                        <span id="audioBitrate"></span>
+                        <br/>
+                        <strong>Buffer level:</strong>
+                        <span id="audioBufferLevel"></span>
+                        </br>
+                        <strong>Sample Rate:</strong>
+                        <span id="audioSampleRate"></span>    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        init();
+    });
+</script>
+</body>
+</html>
