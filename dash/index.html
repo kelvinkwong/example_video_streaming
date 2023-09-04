@@ -45,7 +45,7 @@
             url;
         function init() {
 //            url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
-            url = "https://kkw-oracle.duckdns.org/dash/output-dash/manifest.mpd";
+            url = "//kkw-oracle.duckdns.org/example_video_streaming/dash/output-dash-linuxserver/manifest.mpd";
 
             var filterCapabilities = function(representation){
                 acodec = params.get('acodec'); // avc1, hev1, hvc1, vp09
@@ -56,18 +56,34 @@
                 if (vcodec === null)
                     return true;
 
-                if (acodec === "aac-lc")
-                    acodec = "mp4a.40.2"
-                else if (acodec === "aac-he")
-                    acodec = "mp4a.40.5"
-                else if (acodec === "aac-he-v2")
-                    acodec = "mp4a.40.29"
+                switch(acodec) {
+                    case "aac-lc":
+                        acodec = "mp4a.40.2"; break;
+                    case "aac-he":
+                        acodec = "mp4a.40.5"; break;
+                    case "aac-he-v2":
+                        acodec = "mp4a.40.29"; break;
+                }
+
+                switch(vcodec) {
+                    case "h264":
+                    case "avc":
+                        vcodec = "avc1"; break;
+                    case "h265":
+                    case "hevc":
+                    case "hvc":
+                        vcodec = "hvc1"; break;
+                    case "hev":
+                        vcodec = "hev1"; break;
+                    case "vp9":
+                        vcodec = "vp09"; break;
+                }
 
                 if (representation.codecs === acodec || representation.codecs === vcodec){
                     console.log('enabled representation: ', representation);
                     return true;
                 }
-                if (representation.codecs.includes(vcodec)){
+                else if (representation.codecs.includes(vcodec)){
                     console.log('enabled representation: ', representation);
                     return true;
                 }
