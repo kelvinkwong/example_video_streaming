@@ -44,16 +44,16 @@
             player,
             url;
         function init() {
-//            url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
-            url = "//kkw-oracle.duckdns.org/example_video_streaming/dash/output-dash-linuxserver/manifest.mpd";
+            url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
+            url = params.get('manifest') || url;
 
             var filterCapabilities = function(representation){
                 acodec = params.get('acodec'); // avc1, hev1, hvc1, vp09
                 vcodec = params.get('vcodec'); // ac-3, ec-3, mp4a.40.2, mp4a.40.5, mp4a.40.29
 
-                if (acodec === null)
+                if (representation.mimeType.includes('audio') && acodec === null)
                     return true;
-                if (vcodec === null)
+                if (representation.mimeType.includes('video') && vcodec === null)
                     return true;
 
                 switch(acodec) {
@@ -112,31 +112,34 @@
                 if (dashMetrics && streamInfo) {
                     const periodIdx = streamInfo.index;
                     var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
-                    var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
-                    var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
-                    var adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo);
-                    var currentRep = adaptation.Representation_asArray.find(function (rep) {
-                        return rep.id === repSwitch.to
-                    });
-                    var frameRate = currentRep.frameRate;
-                    var resolution = currentRep.width + 'x' + currentRep.height;
-                    document.getElementById('videoCodec').innerText = currentRep.codecs;
-                    document.getElementById('videoBufferLevel').innerText = bufferLevel + " secs";
-                    document.getElementById('videoFramerate').innerText = frameRate + " fps";
-                    document.getElementById('videoBitrate').innerText = bitrate + " Kbps";
-                    document.getElementById('videoResolution').innerText = resolution;
-
+                    if (repSwitch){
+                        let bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
+                        let bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+                        let adaptation = dashAdapter.getAdaptationForType(periodIdx, 'video', streamInfo);
+                        let currentRep = adaptation.Representation_asArray.find(function (rep) {
+                            return rep.id === repSwitch.to
+                        });
+                        var frameRate = currentRep.frameRate;
+                        var resolution = currentRep.width + 'x' + currentRep.height;
+                        document.getElementById('videoCodec').innerText = currentRep.codecs;
+                        document.getElementById('videoBufferLevel').innerText = bufferLevel + " secs";
+                        document.getElementById('videoFramerate').innerText = frameRate + " fps";
+                        document.getElementById('videoBitrate').innerText = bitrate + " Kbps";
+                        document.getElementById('videoResolution').innerText = resolution;
+                    }
                     repSwitch = dashMetrics.getCurrentRepresentationSwitch('audio', true);
-                    bufferLevel = dashMetrics.getCurrentBufferLevel('audio', true);
-                    bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
-                    adaptation = dashAdapter.getAdaptationForType(periodIdx, 'audio', streamInfo);
-                    currentRep = adaptation.Representation_asArray.find(function (rep) {
-                        return rep.id === repSwitch.to
-                    });
-                    document.getElementById('audioCodec').innerText = currentRep.codecs;
-                    document.getElementById('audioBufferLevel').innerText = bufferLevel + " secs";
-                    document.getElementById('audioSampleRate').innerText = currentRep.audioSamplingRate + " Hz";
-                    document.getElementById('audioBitrate').innerText = bitrate + " Kbps";
+                    if (repSwitch){
+                        let bufferLevel = dashMetrics.getCurrentBufferLevel('audio', true);
+                        let bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+                        let adaptation = dashAdapter.getAdaptationForType(periodIdx, 'audio', streamInfo);
+                        let currentRep = adaptation.Representation_asArray.find(function (rep) {
+                            return rep.id === repSwitch.to
+                        });
+                        document.getElementById('audioCodec').innerText = currentRep.codecs;
+                        document.getElementById('audioBufferLevel').innerText = bufferLevel + " secs";
+                        document.getElementById('audioSampleRate').innerText = currentRep.audioSamplingRate + " Hz";
+                        document.getElementById('audioBitrate').innerText = bitrate + " Kbps";
+                    }
                 }
             }, 1000);
         }
