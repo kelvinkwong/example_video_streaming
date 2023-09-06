@@ -1,0 +1,33 @@
+
+<html>
+  <head>
+    <title>Hls.js demo - basic usage</title>
+  </head>
+
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.11/hls.js" integrity="sha512-6NlHC+HXOVhZeU6pCWETFTQsuGA3wGZzSir0j4Dg97M3EYWXaBZMCJI5pz2KW07YFaJKHPXRzZxMd1mph922HQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <center>
+      <h1>Hls.js demo - basic usage</h1>
+      <video height="600" id="video" controls></video>
+    </center>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      var video = document.getElementById('video');
+      if (Hls.isSupported()) {
+        var hls = new Hls({
+          debug: true,
+        });
+        let url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+        url = params.get('manifest') || url;
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+          video.muted = true;
+          video.play();
+        });
+      }
+    </script>
+</html>
+
