@@ -50,6 +50,7 @@
             var filterCapabilities = function(representation){
                 acodec = params.get('acodec'); // avc1, hev1, hvc1, vp09
                 vcodec = params.get('vcodec'); // ac-3, ec-3, mp4a.40.2, mp4a.40.5, mp4a.40.29
+                // vbandwidth = params.get('vbandwidth');
 
                 if (representation.mimeType.includes('audio') && acodec === null)
                     return true;
@@ -63,9 +64,18 @@
                         acodec = "mp4a.40.5"; break;
                     case "aac-he-v2":
                         acodec = "mp4a.40.29"; break;
+                    case "ac3":
+                        acodec = "ac-3"; break;
+                    case "eac3":
+                    case "ec3":
+                        acodec = "ec-3"; break;
+                    case "ogg":
+                        acodec = "vorbis"; break;
                 }
 
                 switch(vcodec) {
+                    case "av1":
+                        vcodec = "av01"; break;
                     case "h264":
                     case "avc":
                         vcodec = "avc1"; break;
@@ -79,11 +89,11 @@
                         vcodec = "vp09"; break;
                 }
 
-                if (representation.codecs === acodec || representation.codecs === vcodec){
+                if (representation.codecs === acodec){
                     console.log('enabled representation: ', representation);
                     return true;
                 }
-                else if (representation.codecs.includes(vcodec)){
+                else if (representation.codecs.startsWith(vcodec)){
                     console.log('enabled representation: ', representation);
                     return true;
                 }
