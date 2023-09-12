@@ -1,0 +1,27 @@
+
+video {
+    width: 100%;
+    position: relative; /* This position relative is needed to position the menus */
+    margin: 0 auto;
+    line-height: 1.0;
+}
+
+body {
+    background: darkslategrey;
+    color: white;
+}
+
+.col-md-6 {
+    flex: 0 0 auto;
+    width: 50%;
+}
+
+.row {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 0;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: calc(var(--bs-gutter-y) * -1);
+    margin-right: calc(var(--bs-gutter-x)/ -2);
+    margin-left: calc(var(--bs-gutter-x)/ -2)
+}
