@@ -58,7 +58,7 @@ command.extend(['-use_template', '1'])
 command.extend(['-adaptation_sets', " ".join(adaptations)])
 
 # output directory
-command.extend(['-f', 'dash', f'/{DOCKER_OUTPUT_DIR}/manifest.mpd'])
+command.extend(['-f', 'dash', f'{DOCKER_OUTPUT_DIR}/manifest.mpd'])
 
 print(command)
 result = subprocess.run(command, capture_output=True)
