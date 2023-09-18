@@ -5,7 +5,7 @@
 	xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd"
 	profiles="urn:mpeg:dash:profile:isoff-live:2011"
 	type="static"
-	mediaPresentationDuration="PT5.0S"
+	mediaPresentationDuration="PT1M0.0S"
 	maxSegmentDuration="PT5.0S"
 	minBufferTime="PT31.0S">
 	<ProgramInformation>
@@ -20,6 +20,8 @@
 				<SegmentTemplate timescale="48000" initialization="init-stream$RepresentationID$.m4s" media="chunk-stream$RepresentationID$-$Number%05d$.m4s" startNumber="1">
 					<SegmentTimeline>
 						<S t="0" d="240318" />
+						<S d="241664" r="9" />
+						<S d="223232" />
 					</SegmentTimeline>
 				</SegmentTemplate>
 			</Representation>
@@ -286,8 +288,79 @@
 				</SegmentTemplate>
 			</Representation>
 		</AdaptationSet>
-		<AdaptationSet id="8" contentType="audio" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
-			<Representation id="8" mimeType="audio/webm" codecs="opus" bandwidth="8343878" audioSamplingRate="48000">
+		<AdaptationSet id="8" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true" frameRate="60/1" maxWidth="480" maxHeight="270" par="16:9" lang="und">
+			<Representation id="8" mimeType="video/mp4" codecs="hvc1" bandwidth="204015" width="480" height="270" sar="1:1">
+				<SegmentTemplate timescale="15360" initialization="init-stream$RepresentationID$.m4s" media="chunk-stream$RepresentationID$-$Number%05d$.m4s" startNumber="1">
+					<SegmentTimeline>
+						<S t="0" d="126976" />
+						<S d="129024" />
+						<S d="127744" />
+						<S d="128256" />
+						<S d="127232" />
+						<S d="128000" r="1" />
+						<S d="128256" />
+						<S d="127744" />
+						<S d="128256" />
+						<S d="128000" />
+						<S d="128512" />
+						<S d="127232" />
+						<S d="128256" />
+						<S d="128512" />
+						<S d="128000" r="1" />
+						<S d="127744" />
+						<S d="127488" />
+						<S d="128000" />
+						<S d="127744" />
+						<S d="128768" />
+						<S d="128000" r="1" />
+						<S d="127232" />
+						<S d="128256" />
+						<S d="127744" />
+						<S d="128256" />
+						<S d="128000" r="2" />
+						<S d="128256" />
+						<S d="127488" />
+						<S d="128000" />
+						<S d="128256" r="1" />
+						<S d="127744" />
+						<S d="128512" />
+						<S d="127232" />
+						<S d="128768" />
+						<S d="127232" />
+						<S d="128256" />
+						<S d="128768" />
+						<S d="126976" />
+						<S d="128768" />
+						<S d="128256" />
+						<S d="127488" r="1" />
+						<S d="128768" />
+						<S d="128000" />
+						<S d="127488" />
+						<S d="128000" />
+						<S d="127744" />
+						<S d="128000" />
+						<S d="128256" />
+						<S d="128768" />
+						<S d="127744" r="2" />
+						<S d="128256" />
+						<S d="128000" r="1" />
+						<S d="127744" />
+						<S d="128256" />
+						<S d="128000" r="1" />
+						<S d="127744" />
+						<S d="128256" />
+						<S d="128000" r="3" />
+						<S d="128512" />
+						<S d="126976" />
+						<S d="95744" />
+						<S d="129024" />
+						<S d="51200" />
+					</SegmentTimeline>
+				</SegmentTemplate>
+			</Representation>
+		</AdaptationSet>
+		<AdaptationSet id="9" contentType="audio" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+			<Representation id="9" mimeType="audio/webm" codecs="opus" bandwidth="699770" audioSamplingRate="48000">
 				<AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2" />
 				<SegmentTemplate timescale="1000" initialization="init-stream$RepresentationID$.webm" media="chunk-stream$RepresentationID$-$Number%05d$.webm" startNumber="1">
 					<SegmentTimeline>
@@ -298,8 +371,8 @@
 				</SegmentTemplate>
 			</Representation>
 		</AdaptationSet>
-		<AdaptationSet id="9" contentType="audio" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
-			<Representation id="9" mimeType="audio/webm" codecs="vorbis" bandwidth="7639604" audioSamplingRate="48000">
+		<AdaptationSet id="10" contentType="audio" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+			<Representation id="10" mimeType="audio/webm" codecs="vorbis" bandwidth="640706" audioSamplingRate="48000">
 				<AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2" />
 				<SegmentTemplate timescale="1000" initialization="init-stream$RepresentationID$.webm" media="chunk-stream$RepresentationID$-$Number%05d$.webm" startNumber="1">
 					<SegmentTimeline>
@@ -427,8 +500,8 @@
 				</SegmentTemplate>
 			</Representation>
 		</AdaptationSet>
-		<AdaptationSet id="10" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true" frameRate="60/1" maxWidth="480" maxHeight="270" par="16:9">
-			<Representation id="10" mimeType="video/webm" codecs="vp8" bandwidth="25986255" width="480" height="270" sar="1:1">
+		<AdaptationSet id="11" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true" frameRate="60/1" maxWidth="480" maxHeight="270" par="16:9">
+			<Representation id="11" mimeType="video/webm" codecs="vp8" bandwidth="2179373" width="480" height="270" sar="1:1">
 				<SegmentTemplate timescale="1000" initialization="init-stream$RepresentationID$.webm" media="chunk-stream$RepresentationID$-$Number%05d$.webm" startNumber="1">
 					<SegmentTimeline>
 						<S t="0" d="6283" />
@@ -516,8 +589,8 @@
 				</SegmentTemplate>
 			</Representation>
 		</AdaptationSet>
-		<AdaptationSet id="11" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true" frameRate="60/1" maxWidth="480" maxHeight="270" par="16:9">
-			<Representation id="11" mimeType="video/webm" codecs="vp09.00.21.08" bandwidth="40489743" width="480" height="270" sar="1:1">
+		<AdaptationSet id="12" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true" frameRate="60/1" maxWidth="480" maxHeight="270" par="16:9">
+			<Representation id="12" mimeType="video/webm" codecs="vp09.00.21.08" bandwidth="3395728" width="480" height="270" sar="1:1">
 				<SegmentTemplate timescale="1000" initialization="init-stream$RepresentationID$.webm" media="chunk-stream$RepresentationID$-$Number%05d$.webm" startNumber="1">
 					<SegmentTimeline>
 						<S t="0" d="6400" r="98" />
